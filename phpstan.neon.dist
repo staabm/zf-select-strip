@@ -1,7 +1,3 @@
-includes:
-    - config/stubFiles.neon
-    - config/extensions.neon
-
 parameters:
     level: max
 

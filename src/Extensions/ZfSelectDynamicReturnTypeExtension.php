@@ -45,13 +45,7 @@ final class ZfSelectDynamicReturnTypeExtension implements DynamicMethodReturnTyp
 
     private NodeFinder $nodeFinder;
 
-    /**
-     * @var ReflectionProvider
-     */
-    private $reflectionProvider;
-
-
-    public function __construct(ReflectionProvider $reflectionProvider)
+    public function __construct()
     {
         $this->nodeFinder = new NodeFinder();
     }
