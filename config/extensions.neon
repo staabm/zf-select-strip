@@ -1,0 +1,5 @@
+services:
+    -
+        class: staabm\ZfSelectStrip\Extensions\ZfSelectDynamicReturnTypeExtension
+        tags:
+        	- phpstan.broker.dynamicMethodReturnTypeExtension
