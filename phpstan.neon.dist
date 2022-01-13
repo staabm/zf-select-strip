@@ -1,3 +1,6 @@
+includes:
+    - config/extensions.neon
+
 parameters:
     level: max
 

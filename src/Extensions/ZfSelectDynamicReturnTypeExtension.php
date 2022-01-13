@@ -78,6 +78,9 @@ final class ZfSelectDynamicReturnTypeExtension implements DynamicMethodReturnTyp
         }
 
         $tableClassReflection = $objectType->getClassReflection();
+        if ($tableClassReflection ===null ){
+            return $defaultReturn;
+        }
         $fakeTableAbstract = $this->fakeTableAbstract($tableClassReflection);
 
         $select = new Zend_Db_Table_Select($fakeTableAbstract);

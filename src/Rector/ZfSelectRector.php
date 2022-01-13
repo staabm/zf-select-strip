@@ -5,10 +5,15 @@ declare(strict_types=1);
 namespace staabm\ZfSelectStrip\Rector;
 
 use Clx_Model_Mapper_Abstract;
+use ClxProductNet_DbStatement;
 use Nette\Utils\Strings;
 use PhpParser\Node;
+use PhpParser\Node\Arg;
+use PhpParser\Node\Expr\Array_;
+use PhpParser\Node\Expr\New_;
 use PhpParser\Node\Identifier;
 use PhpParser\Node\Expr\MethodCall;
+use PhpParser\Node\Name;
 use PHPStan\Type\ObjectType;
 use PHPStan\Type\ThisType;
 use Rector\Core\Rector\AbstractRector;
@@ -41,10 +46,13 @@ final class ZfSelectRector extends AbstractRector
         $this->nodesToAddCollector->addNodeAfterNode($newNode, $node);
 */
 
-        $methodCallName = $this->getName($node->name);
-        $newMethodCallName = Strings::replace($methodCallName, '#^fetchRow#', 'fetchRowByStatement');
+        $node->name = new Identifier('fetchRowByStatement');
 
-        $node->name = new Identifier($newMethodCallName);
+        $wrappedStatement = new New_(
+            new Name(ClxProductNet_DbStatement::class),
+            [$node->args[0], new Arg(new Array_())]
+        );
+        $node->args[0] = new Arg($wrappedStatement);
 
         // return $node if you modified it
         return $node;
@@ -52,12 +60,16 @@ final class ZfSelectRector extends AbstractRector
 
     private function shouldSkip(MethodCall $methodCall): bool
     {
+        if (count($methodCall->getArgs()) < 1) {
+            return true;
+        }
+
         if (!$this->nodeNameResolver->isName($methodCall->name, 'fetchRow')) {
             return true;
         }
 
         $varType = $this->nodeTypeResolver->getType($methodCall->var);
-        if (! $varType instanceof ThisType) {
+        if (!$varType instanceof ThisType) {
             return true;
         }
 
