@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace staabm\ZfSelectStrip\Rector;
 
+use Clx_Model_Mapper_Abstract;
 use Nette\Utils\Strings;
 use PhpParser\Node;
 use PhpParser\Node\Identifier;
 use PhpParser\Node\Expr\MethodCall;
 use PHPStan\Type\ObjectType;
+use PHPStan\Type\ThisType;
 use Rector\Core\Rector\AbstractRector;
 use Symplify\RuleDocGenerator\ValueObject\CodeSample\CodeSample;
 use Symplify\RuleDocGenerator\ValueObject\RuleDefinition;
@@ -34,12 +36,6 @@ final class ZfSelectRector extends AbstractRector
         }
 
 
-        // we only care about "set*" method names
-        if (! $this->isName($node->name, 'set*')) {
-            // return null to skip it
-            return null;
-        }
-
         /*
         $newNode
         $this->nodesToAddCollector->addNodeAfterNode($newNode, $node);
@@ -56,12 +52,12 @@ final class ZfSelectRector extends AbstractRector
 
     private function shouldSkip(MethodCall $methodCall): bool
     {
-        if (! $this->nodeNameResolver->isName($methodCall->name, 'fetchRow')) {
+        if (!$this->nodeNameResolver->isName($methodCall->name, 'fetchRow')) {
             return true;
         }
 
         $varType = $this->nodeTypeResolver->getType($methodCall->var);
-        if (! $varType instanceof ObjectType) {
+        if (! $varType instanceof ThisType) {
             return true;
         }
 

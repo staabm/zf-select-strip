@@ -2,6 +2,8 @@
 
 namespace ZfSelectRectorTest;
 
+use Clx_Model_Mapper_Abstract;
+
 class Application_Model_Mapper_Artfarbe extends Clx_Model_Mapper_Abstract
 {
     public function simpleSelect()
@@ -15,6 +17,8 @@ class Application_Model_Mapper_Artfarbe extends Clx_Model_Mapper_Abstract
 -----
 
 namespace ZfSelectRectorTest;
+
+use Clx_Model_Mapper_Abstract;
 
 class Application_Model_Mapper_Artfarbe extends Clx_Model_Mapper_Abstract
 {
