@@ -19,8 +19,10 @@ use PhpParser\PrettyPrinter\Standard;
 use PHPStan\Analyser\Scope;
 use PHPStan\Reflection\ClassReflection;
 use PHPStan\ShouldNotHappenException;
+use PHPStan\Type\Constant\ConstantArrayType;
 use PHPStan\Type\Constant\ConstantStringType;
 use PHPStan\Type\ObjectType;
+use PHPStan\Type\TypeUtils;
 use ReflectionClass;
 use Zend_Db_Table_Abstract;
 use Zend_Db_Table_Select;
@@ -82,10 +84,43 @@ final class ZfSelectReflection {
 
             switch(strtolower($methodName)) {
                 case 'from': {
-                    $fromType = $scope->getType($args[0]->value);
-                    if ($fromType instanceof ConstantStringType) {
-                        $select->from($fromType->getValue());
+                    if (count($args) < 1) {
+                        return null;
                     }
+                    $fromType = $scope->getType($args[0]->value);
+                    if (!$fromType instanceof ConstantStringType) {
+                        return null;
+                    }
+                    $select->from($fromType->getValue());
+                    break;
+                }
+                case 'join': {
+                    if (count($args) < 3) {
+                        return null;
+                    }
+
+                    $joinNameType = $scope->getType($args[0]->value);
+                    $joinConditionsType = $scope->getType($args[1]->value);
+                    $joinColsType = $scope->getType($args[2]->value);
+
+                    if (!$joinNameType instanceof ConstantStringType) {
+                        return null;
+                    }
+                    if (!$joinConditionsType instanceof ConstantStringType) {
+                        return null;
+                    }
+                    $joinCols = Zend_Db_Table_Select::SQL_WILDCARD;
+                    if ($joinColsType instanceof ConstantArrayType) {
+                        if (!$joinColsType->isEmpty()) {
+                            throw new ShouldNotHappenException();
+                        }
+                        $joinCols = [];
+                    } elseif ($joinColsType instanceof ConstantStringType) {
+                        $joinCols = $joinColsType->getValue();
+                    } else {
+                        throw new ShouldNotHappenException();
+                    }
+                    $select->join($joinNameType->getValue(), $joinConditionsType->getValue(), $joinCols);
                     break;
                 }
             }
