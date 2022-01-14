@@ -83,7 +83,8 @@ final class ZfSelectReflection {
             $args = $methodCall->getArgs();
 
             switch(strtolower($methodName)) {
-                case 'from': {
+                case 'from':
+                {
                     if (count($args) < 1) {
                         return null;
                     }
@@ -94,7 +95,9 @@ final class ZfSelectReflection {
                     $select->from($fromType->getValue());
                     break;
                 }
-                case 'join': {
+                case 'join':
+                case 'joinleft':
+                {
                     if (count($args) < 3) {
                         return null;
                     }
@@ -120,8 +123,12 @@ final class ZfSelectReflection {
                     } else {
                         throw new ShouldNotHappenException();
                     }
-                    
-                    $select->join($joinNameType->getValue(), $joinConditionsType->getValue(), $joinCols);
+
+                    if (strtolower($methodName) === 'join') {
+                        $select->join($joinNameType->getValue(), $joinConditionsType->getValue(), $joinCols);
+                    } else {
+                        $select->joinLeft($joinNameType->getValue(), $joinConditionsType->getValue(), $joinCols);
+                    }
                     break;
                 }
             }
