@@ -15,6 +15,7 @@ class Application_Model_Mapper_Artfarbe extends Clx_Model_Mapper_Abstract
     }
 }
 -----
+<?php
 
 namespace ZfSelectRectorTest;
 

@@ -6,7 +6,6 @@ namespace staabm\ZfSelectStrip\Rector;
 
 use Clx_Model_Mapper_Abstract;
 use ClxProductNet_DbStatement;
-use Nette\Utils\Strings;
 use PhpParser\Node;
 use PhpParser\Node\Arg;
 use PhpParser\Node\Expr\Array_;
@@ -14,9 +13,12 @@ use PhpParser\Node\Expr\New_;
 use PhpParser\Node\Identifier;
 use PhpParser\Node\Expr\MethodCall;
 use PhpParser\Node\Name;
-use PHPStan\Type\ObjectType;
+use PhpParser\Node\Scalar\String_;
+use PHPStan\Analyser\Scope;
 use PHPStan\Type\ThisType;
 use Rector\Core\Rector\AbstractRector;
+use Rector\NodeTypeResolver\Node\AttributeKey;
+use staabm\ZfSelectStrip\Reflection\ZfSelectReflection;
 use Symplify\RuleDocGenerator\ValueObject\CodeSample\CodeSample;
 use Symplify\RuleDocGenerator\ValueObject\RuleDefinition;
 
@@ -40,21 +42,31 @@ final class ZfSelectRector extends AbstractRector
             return null;
         }
 
+        $scope = $node->getAttribute(AttributeKey::SCOPE);
+        if (! $scope instanceof Scope) {
+            return false;
+        }
 
         /*
         $newNode
         $this->nodesToAddCollector->addNodeAfterNode($newNode, $node);
 */
 
+        $tableSelectArg = $node->args[0];
         $node->name = new Identifier('fetchRowByStatement');
 
         $wrappedStatement = new New_(
             new Name(ClxProductNet_DbStatement::class),
-            [$node->args[0], new Arg(new Array_())]
+            [$tableSelectArg, new Arg(new Array_())]
         );
         $node->args[0] = new Arg($wrappedStatement);
 
-        // return $node if you modified it
+        $zfSelectReflection = new ZfSelectReflection();
+        $selectCreateAssign = $zfSelectReflection->findSelectCreateAssign($tableSelectArg->value);
+        $fakeSelect = $zfSelectReflection->fakeTableSelect($selectCreateAssign->expr, $scope);
+
+        $selectCreateAssign->expr = new String_($fakeSelect->__toString());
+
         return $node;
     }
 

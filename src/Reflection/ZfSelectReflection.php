@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace staabm\ZfSelectStrip\Reflection;
 
 
+use PhpParser\Builder\Method;
 use PhpParser\Node;
 use PhpParser\Node\Expr;
 use PhpParser\Node\Expr\Assign;
 use PhpParser\Node\Expr\MethodCall;
+use PhpParser\Node\Expr\Variable;
 use PhpParser\Node\FunctionLike;
 use PhpParser\NodeFinder;
 use PHPStan\Analyser\Scope;
@@ -78,10 +80,13 @@ final class ZfSelectReflection {
         return $fakeTableAbstract;
     }
 
-    public function findSelectCreateExpression(MethodCall $methodCall): ?Expr
+    /**
+     * @param MethodCall|Variable $expr
+     */
+    public function findSelectCreateAssign(Expr $expr): ?Assign
     {
         // todo: use astral simpleNameResolver
-        $nameResolver = function ($node) {
+        $nameResolver = function (Node $node) {
             if (\is_string($node->name)) {
                 return $node->name;
             }
@@ -90,15 +95,20 @@ final class ZfSelectReflection {
             }
         };
 
-        $current = $methodCall;
+        $current = $expr;
         while (null !== $current) {
             /** @var Assign|null $assign */
             $assign = $this->findFirstPreviousOfNode($current, function ($node) {
                 return $node instanceof Assign;
             });
 
-            if (null !== $assign && $nameResolver($assign->var) === $nameResolver($methodCall->var)) {
-                return $assign->expr;
+            if (null !== $assign) {
+                if ($expr instanceof MethodCall && $nameResolver($assign->var) === $nameResolver($expr->var)) {
+                    return $assign;
+                }
+                if ($expr instanceof Variable && $nameResolver($assign->var) === $nameResolver($expr)) {
+                    return $assign;
+                }
             }
 
             $current = $assign;
