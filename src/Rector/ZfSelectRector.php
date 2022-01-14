@@ -10,11 +10,13 @@ use PhpParser\Node;
 use PhpParser\Node\Arg;
 use PhpParser\Node\Expr\Array_;
 use PhpParser\Node\Expr\New_;
+use PhpParser\Node\Expr\Variable;
 use PhpParser\Node\Identifier;
 use PhpParser\Node\Expr\MethodCall;
 use PhpParser\Node\Name;
 use PhpParser\Node\Scalar\String_;
 use PHPStan\Analyser\Scope;
+use PHPStan\ShouldNotHappenException;
 use PHPStan\Type\ThisType;
 use Rector\Core\Rector\AbstractRector;
 use Rector\NodeTypeResolver\Node\AttributeKey;
@@ -55,6 +57,10 @@ final class ZfSelectRector extends AbstractRector
             [$tableSelectArg, new Arg(new Array_())]
         );
         $node->args[0] = new Arg($wrappedStatement);
+
+        if (!$tableSelectArg->value instanceof Variable) {
+            throw new ShouldNotHappenException();
+        }
 
         $zfSelectReflection = new ZfSelectReflection();
         $selectCreateAssign = $zfSelectReflection->findSelectCreateAssign($tableSelectArg->value);
