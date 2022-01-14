@@ -12,10 +12,14 @@ use PhpParser\Node\Expr\Assign;
 use PhpParser\Node\Expr\MethodCall;
 use PhpParser\Node\Expr\Variable;
 use PhpParser\Node\FunctionLike;
+use PhpParser\Node\Stmt\Return_;
+use PhpParser\NodeDumper;
 use PhpParser\NodeFinder;
+use PhpParser\PrettyPrinter\Standard;
 use PHPStan\Analyser\Scope;
 use PHPStan\Reflection\ClassReflection;
 use PHPStan\ShouldNotHappenException;
+use PHPStan\Type\Constant\ConstantStringType;
 use PHPStan\Type\ObjectType;
 use ReflectionClass;
 use Zend_Db_Table_Abstract;
@@ -35,6 +39,13 @@ final class ZfSelectReflection {
      * @var string
      */
     private const PARENT = 'parent';
+
+    /**
+     * @internal of php-parser, do not change
+     * @see https://github.com/nikic/PHP-Parser/pull/681/files
+     * @var string
+     */
+    public const NEXT_NODE = 'next';
 
     private NodeFinder $nodeFinder;
 
@@ -61,29 +72,26 @@ final class ZfSelectReflection {
         if ($tableClassReflection ===null ){
             return null;
         }
+
         $fakeTableAbstract = $this->fakeTableAbstract($tableClassReflection);
-
         $select = new Zend_Db_Table_Select($fakeTableAbstract);
+
+        foreach($this->findOnSelectMethodCalls($selectCreate) as $methodCall) {
+            $methodName = $this->resolveName($methodCall->name);
+            $args = $methodCall->getArgs();
+
+            switch(strtolower($methodName)) {
+                case 'from': {
+                    $fromType = $scope->getType($args[0]->value);
+                    if ($fromType instanceof ConstantStringType) {
+                        $select->from($fromType->getValue());
+                    }
+                    break;
+                }
+            }
+        }
+
         return $select;
-    }
-
-    public function fakeTableAbstract(ClassReflection $tableClassReflection) : Zend_Db_Table_Abstract {
-        $tableName = $tableClassReflection->getNativeProperty('_name')->getNativeReflection()->getDefaultValue();
-        $pkName = $tableClassReflection->getNativeProperty('_primary')->getNativeReflection()->getDefaultValue();
-
-        $fakeTableAbstract = new class extends Zend_Db_Table_Abstract {
-        };
-        $reflectionClass = new ReflectionClass($fakeTableAbstract);
-
-        $tableProperty = $reflectionClass->getProperty('_name');
-        $tableProperty->setAccessible(true);
-        $tableProperty->setValue($fakeTableAbstract, $tableName);
-
-        $tableProperty = $reflectionClass->getProperty('_primary');
-        $tableProperty->setAccessible(true);
-        $tableProperty->setValue($fakeTableAbstract, $pkName);
-
-        return $fakeTableAbstract;
     }
 
     /**
@@ -113,13 +121,92 @@ final class ZfSelectReflection {
         return null;
     }
 
+    private function fakeTableAbstract(ClassReflection $tableClassReflection) : Zend_Db_Table_Abstract {
+        $tableName = $tableClassReflection->getNativeProperty('_name')->getNativeReflection()->getDefaultValue();
+        $pkName = $tableClassReflection->getNativeProperty('_primary')->getNativeReflection()->getDefaultValue();
+
+        $fakeTableAbstract = new class extends Zend_Db_Table_Abstract {
+        };
+        $reflectionClass = new ReflectionClass($fakeTableAbstract);
+
+        $tableProperty = $reflectionClass->getProperty('_name');
+        $tableProperty->setAccessible(true);
+        $tableProperty->setValue($fakeTableAbstract, $tableName);
+
+        $tableProperty = $reflectionClass->getProperty('_primary');
+        $tableProperty->setAccessible(true);
+        $tableProperty->setValue($fakeTableAbstract, $pkName);
+
+        return $fakeTableAbstract;
+    }
+
+    /**
+     * @return MethodCall[]
+     */
+    private function findOnSelectMethodCalls(Assign $selectCreate): array {
+        $methodCalls = [];
+
+        $current = $selectCreate;
+        do {
+            $methodCall = $this->findFirstNext($current, function (Node $node) use ($selectCreate):bool {
+                if ($node instanceof MethodCall && $this->resolveName($node->var) === $this->resolveName($selectCreate->var)) {
+                    return true;
+                }
+                return false;
+            });
+
+            if ($methodCall !== null) {
+                $methodCalls[] = $methodCall;
+                $current = $methodCall;
+            }
+        } while ($methodCall !== null);
+
+        return $methodCalls;
+    }
+
+    /**
+     * @param Node $node
+     */
     private function resolveName(Node $node):?string {
+        if (!property_exists($node, 'name')) {
+            throw new ShouldNotHappenException();
+        }
+
         if (\is_string($node->name)) {
             return $node->name;
         }
         if ($node->name instanceof Node\Identifier) {
             return $node->name->toString();
         }
+
+        return null;
+    }
+
+    private function findFirstNext(Node $node, callable $filter): ?Node
+    {
+        $next = $node->getAttribute(self::NEXT_NODE);
+        if ($next instanceof Node) {
+            if ($next instanceof Return_ && $next->expr === null) {
+                return null;
+            }
+
+            $found = $this->findFirst($next, $filter);
+            if ($found instanceof Node) {
+                return $found;
+            }
+
+            return $this->findFirstNext($next, $filter);
+        }
+
+        $parent = $node->getAttribute(self::PARENT);
+        if ($parent instanceof Return_ || $parent instanceof FunctionLike) {
+            return null;
+        }
+
+        if ($parent instanceof Node) {
+            return $this->findFirstNext($parent, $filter);
+        }
+
         return null;
     }
 
