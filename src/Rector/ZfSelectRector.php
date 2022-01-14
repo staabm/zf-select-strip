@@ -17,12 +17,14 @@ use PhpParser\Node\Name;
 use PhpParser\Node\Scalar\String_;
 use PHPStan\Analyser\Scope;
 use PHPStan\ShouldNotHappenException;
+use PHPStan\Type\ObjectType;
 use PHPStan\Type\ThisType;
 use Rector\Core\Rector\AbstractRector;
 use Rector\NodeTypeResolver\Node\AttributeKey;
 use staabm\ZfSelectStrip\Reflection\ZfSelectReflection;
 use Symplify\RuleDocGenerator\ValueObject\CodeSample\CodeSample;
 use Symplify\RuleDocGenerator\ValueObject\RuleDefinition;
+use Zend_Db_Table_Select;
 
 final class ZfSelectRector extends AbstractRector
 {
@@ -40,16 +42,12 @@ final class ZfSelectRector extends AbstractRector
      */
     public function refactor(Node $node): ?Node
     {
-        if ($this->shouldSkip($node)) {
-            return null;
-        }
-
         $scope = $node->getAttribute(AttributeKey::SCOPE);
         if (! $scope instanceof Scope) {
             return null;
         }
 
-        if (!$node->getArgs()[0]->value instanceof Variable) {
+        if ($this->shouldSkip($node, $scope)) {
             return null;
         }
 
@@ -82,9 +80,18 @@ final class ZfSelectRector extends AbstractRector
         return $node;
     }
 
-    private function shouldSkip(MethodCall $methodCall): bool
+    private function shouldSkip(MethodCall $methodCall, Scope $scope): bool
     {
         if (count($methodCall->getArgs()) < 1) {
+            return true;
+        }
+
+        $argType = $scope->getType($methodCall->getArgs()[0]->value);
+        if (!$argType instanceof ObjectType) {
+            return true;
+        }
+
+        if ($argType->getClassReflection()->getName() !== Zend_Db_Table_Select::class && ! $argType->getClassReflection()->isSubclassOf(Zend_Db_Table_Select::class)) {
             return true;
         }
 
