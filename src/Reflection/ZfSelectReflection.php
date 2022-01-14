@@ -22,6 +22,7 @@ use PHPStan\ShouldNotHappenException;
 use PHPStan\Type\Constant\ConstantArrayType;
 use PHPStan\Type\Constant\ConstantIntegerType;
 use PHPStan\Type\Constant\ConstantStringType;
+use PHPStan\Type\IntegerType;
 use PHPStan\Type\ObjectType;
 use PHPStan\Type\TypeUtils;
 use ReflectionClass;
@@ -149,21 +150,54 @@ final class ZfSelectReflection {
                     break;
                 }
                 case 'group':
+                case 'order':
                 {
                     if (count($args) < 1) {
                         return null;
                     }
-                    $groupType = $scope->getType($args[0]->value);
-                    if (!$groupType instanceof ConstantStringType) {
+                    $specType = $scope->getType($args[0]->value);
+
+                    if ($specType instanceof ConstantStringType) {
+                        $spec = $specType->getValue();
+                    } elseif ($specType instanceof ConstantArrayType) {
+                        $spec = $this->constantArrayToScalarArray($specType);
+                    } else {
                         return null;
                     }
-                    $select->group($groupType->getValue());
+
+                    if (strtolower($methodName) === 'group') {
+                        $select->group($spec);
+                    } else {
+                        $select->order($spec);
+                    }
                     break;
                 }
             }
         }
 
         return $select;
+    }
+
+    /**
+     * @param ConstantArrayType $constantArrayType
+     * @return scalar[]
+     */
+    private function constantArrayToScalarArray(ConstantArrayType $constantArrayType):array {
+        $integerType = new IntegerType();
+        if (!$integerType->isSuperTypeOf($constantArrayType->getKeyType())) {
+            // no array shape support yet
+            throw new ShouldNotHappenException();
+        }
+
+        $values = [];
+        foreach($constantArrayType->getValueTypes() as $valueType) {
+            if (!$valueType instanceof ConstantStringType) {
+                // no array shape support yet
+                throw new ShouldNotHappenException();
+            }
+            $values[] = $valueType->getValue();
+        }
+        return $values;
     }
 
     /**
