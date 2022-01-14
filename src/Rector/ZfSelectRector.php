@@ -50,7 +50,7 @@ final class ZfSelectRector extends AbstractRector
         }
 
         if (!$node->getArgs()[0]->value instanceof Variable) {
-            return true;
+            return null;
         }
 
         $tableSelectArg = $node->getArgs()[0];
