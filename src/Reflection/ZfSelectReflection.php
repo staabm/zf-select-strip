@@ -15,6 +15,7 @@ use PhpParser\Node\FunctionLike;
 use PhpParser\NodeFinder;
 use PHPStan\Analyser\Scope;
 use PHPStan\Reflection\ClassReflection;
+use PHPStan\ShouldNotHappenException;
 use PHPStan\Type\ObjectType;
 use ReflectionClass;
 use Zend_Db_Table_Abstract;
@@ -44,7 +45,12 @@ final class ZfSelectReflection {
 
     public function fakeTableSelect(Assign $selectCreate, Scope $scope): ?Zend_Db_Table_Select {
 
-        $tableClass = $selectCreate->expr->var;
+        $methodCall = $selectCreate->expr;
+        if (!$methodCall instanceof MethodCall) {
+            throw new ShouldNotHappenException();
+        }
+
+        $tableClass = $methodCall->var;
         $objectType = $scope->getType($tableClass);
 
         if (!$objectType instanceof ObjectType) {
