@@ -109,7 +109,7 @@ final class ZfSelectReflection {
                     if (!$joinConditionsType instanceof ConstantStringType) {
                         return null;
                     }
-                    $joinCols = Zend_Db_Table_Select::SQL_WILDCARD;
+
                     if ($joinColsType instanceof ConstantArrayType) {
                         if (!$joinColsType->isEmpty()) {
                             throw new ShouldNotHappenException();
@@ -120,6 +120,7 @@ final class ZfSelectReflection {
                     } else {
                         throw new ShouldNotHappenException();
                     }
+                    
                     $select->join($joinNameType->getValue(), $joinConditionsType->getValue(), $joinCols);
                     break;
                 }
