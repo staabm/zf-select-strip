@@ -20,6 +20,7 @@ use PHPStan\Analyser\Scope;
 use PHPStan\Reflection\ClassReflection;
 use PHPStan\ShouldNotHappenException;
 use PHPStan\Type\Constant\ConstantArrayType;
+use PHPStan\Type\Constant\ConstantIntegerType;
 use PHPStan\Type\Constant\ConstantStringType;
 use PHPStan\Type\ObjectType;
 use PHPStan\Type\TypeUtils;
@@ -129,6 +130,22 @@ final class ZfSelectReflection {
                     } else {
                         $select->joinLeft($joinNameType->getValue(), $joinConditionsType->getValue(), $joinCols);
                     }
+                    break;
+                }
+                case 'where':
+                {
+                    if (count($args) < 2) {
+                        return null;
+                    }
+                    $whereCondType = $scope->getType($args[0]->value);
+                    $whereValueType = $scope->getType($args[1]->value);
+                    if (!$whereCondType instanceof ConstantStringType) {
+                        return null;
+                    }
+                    if (!$whereValueType instanceof ConstantIntegerType) {
+                        return null;
+                    }
+                    $select->where($whereCondType->getValue(), $whereValueType->getValue());
                     break;
                 }
             }
