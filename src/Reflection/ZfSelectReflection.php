@@ -26,6 +26,7 @@ use PHPStan\Type\Constant\ConstantStringType;
 use PHPStan\Type\IntegerType;
 use PHPStan\Type\ObjectType;
 use PHPStan\Type\TypeUtils;
+use PHPStan\Type\VerbosityLevel;
 use ReflectionClass;
 use Zend_Db_Table_Abstract;
 use Zend_Db_Table_Select;
@@ -75,12 +76,12 @@ final class ZfSelectReflection {
         }
 
         $tableClassReflection = $objectType->getClassReflection();
-        if ($tableClassReflection ===null ){
+        if ($tableClassReflection === null || !$tableClassReflection->isSubclassOf(Zend_Db_Table_Abstract::class)) {
             return null;
         }
 
-        $fakeTableAbstract = $this->fakeTableAbstract($tableClassReflection);
-        $select = new Zend_Db_Table_Select($fakeTableAbstract);
+        $tableAbstract = $this->createTableAbstract($tableClassReflection);
+        $select = new Zend_Db_Table_Select($tableAbstract);
 
         foreach($this->findOnSelectMethodCalls($selectCreate) as $methodCall) {
             $methodName = $this->resolveName($methodCall->name);
@@ -255,23 +256,13 @@ final class ZfSelectReflection {
         return null;
     }
 
-    private function fakeTableAbstract(ClassReflection $tableClassReflection) : Zend_Db_Table_Abstract {
-        $tableName = $tableClassReflection->getNativeProperty('_name')->getNativeReflection()->getDefaultValue();
-        $pkName = $tableClassReflection->getNativeProperty('_primary')->getNativeReflection()->getDefaultValue();
-
-        $fakeTableAbstract = new class extends Zend_Db_Table_Abstract {
-        };
-        $reflectionClass = new ReflectionClass($fakeTableAbstract);
-
-        $tableProperty = $reflectionClass->getProperty('_name');
-        $tableProperty->setAccessible(true);
-        $tableProperty->setValue($fakeTableAbstract, $tableName);
-
-        $tableProperty = $reflectionClass->getProperty('_primary');
-        $tableProperty->setAccessible(true);
-        $tableProperty->setValue($fakeTableAbstract, $pkName);
-
-        return $fakeTableAbstract;
+    private function createTableAbstract(ClassReflection $tableClassReflection) : Zend_Db_Table_Abstract {
+        $reflectionClass = new ReflectionClass($tableClassReflection->getName());
+        $instance = $reflectionClass->newInstance();
+        if (!$instance instanceof Zend_Db_Table_Abstract) {
+            throw new ShouldNotHappenException();
+        }
+        return $instance;
     }
 
     /**
@@ -288,11 +279,12 @@ final class ZfSelectReflection {
                 }
                 return false;
             });
-            if (!$methodCall instanceof MethodCall) {
-                throw new ShouldNotHappenException();
-            }
 
             if ($methodCall !== null) {
+                if (!$methodCall instanceof MethodCall) {
+                    throw new ShouldNotHappenException();
+                }
+
                 $methodCalls[] = $methodCall;
                 $current = $methodCall;
             }

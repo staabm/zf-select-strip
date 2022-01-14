@@ -47,7 +47,7 @@ final class ZfSelectRector extends AbstractRector
             return null;
         }
 
-        $tableSelectArg = $node->args[0];
+        $tableSelectArg = $node->getArgs()[0];
         $node->name = new Identifier('fetchRowByStatement');
 
         $wrappedStatement = new New_(
