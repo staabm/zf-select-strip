@@ -59,4 +59,19 @@ class Foo {
  INNER JOIN `art` AS `e` ON a.artid = e.artid
  LEFT JOIN `artgroessebestand` AS `bestand` ON (k.artgroesseid = bestand.artgroesseid) WHERE (e.aktiv = 1)'", $select->__toString());
     }
+
+    function foo6()
+    {
+        $dbTable = new \DbTable();
+        $select = $dbTable->select();
+        $select->from('ada as a');
+        $select->join('art as e', 'a.artid = e.artid', []);
+        $select->joinLeft('artgroessebestand as bestand', '(k.artgroesseid = bestand.artgroesseid)', []);
+        $select->where('e.aktiv = ?', 1);
+        $select->group('b.artfarbeid');
+
+        assertType("'SELECT `a`.* FROM `ada` AS `a`
+ INNER JOIN `art` AS `e` ON a.artid = e.artid
+ LEFT JOIN `artgroessebestand` AS `bestand` ON (k.artgroesseid = bestand.artgroesseid) WHERE (e.aktiv = 1) GROUP BY `b`.`artfarbeid`'", $select->__toString());
+    }
 }

@@ -148,6 +148,18 @@ final class ZfSelectReflection {
                     $select->where($whereCondType->getValue(), $whereValueType->getValue());
                     break;
                 }
+                case 'group':
+                {
+                    if (count($args) < 1) {
+                        return null;
+                    }
+                    $groupType = $scope->getType($args[0]->value);
+                    if (!$groupType instanceof ConstantStringType) {
+                        return null;
+                    }
+                    $select->group($groupType->getValue());
+                    break;
+                }
             }
         }
 
