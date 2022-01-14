@@ -13,18 +13,10 @@ parameters:
 
     ignoreErrors:
         -
-            message: '#Function Deployer\\runMysqlQuery\(\) should return array<int, array<int, string>>\|null but return statement is missing.#'
-            path: tests/data/runMysqlQuery.php
-        -
-            message: '#.*has no return type specified.#'
-            path: tests/*
-        -
-            message: '#.*with no type specified.#'
-            path: tests/*
-        -
             message: '#.*return type has no value type specified in iterable type iterable.#'
             path: tests/*
 
     excludePaths:
         analyseAndScan:
             - *Fixture/**
+            - *classes/**

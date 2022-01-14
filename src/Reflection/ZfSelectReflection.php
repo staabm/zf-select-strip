@@ -83,6 +83,9 @@ final class ZfSelectReflection {
 
         foreach($this->findOnSelectMethodCalls($selectCreate) as $methodCall) {
             $methodName = $this->resolveName($methodCall->name);
+            if($methodName === null) {
+                throw new ShouldNotHappenException();
+            }
             $args = $methodCall->getArgs();
 
             switch(strtolower($methodName)) {
@@ -284,6 +287,9 @@ final class ZfSelectReflection {
                 }
                 return false;
             });
+            if (!$methodCall instanceof MethodCall) {
+                throw new ShouldNotHappenException();
+            }
 
             if ($methodCall !== null) {
                 $methodCalls[] = $methodCall;
