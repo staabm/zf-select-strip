@@ -20,6 +20,7 @@ use PHPStan\Analyser\Scope;
 use PHPStan\Reflection\ClassReflection;
 use PHPStan\ShouldNotHappenException;
 use PHPStan\Type\Constant\ConstantArrayType;
+use PHPStan\Type\Constant\ConstantBooleanType;
 use PHPStan\Type\Constant\ConstantIntegerType;
 use PHPStan\Type\Constant\ConstantStringType;
 use PHPStan\Type\IntegerType;
@@ -181,6 +182,19 @@ final class ZfSelectReflection {
                         $select->order($spec);
                     }
                     break;
+                }
+                case 'setintegritycheck':
+                {
+                    if (count($args) < 1) {
+                        return null;
+                    }
+                    $flagType = $scope->getType($args[0]->value);
+
+                    if (!$flagType instanceof ConstantBooleanType) {
+                        throw new ShouldNotHappenException();
+                    }
+
+                    $select->setIntegrityCheck($flagType->getValue());
                 }
             }
         }
