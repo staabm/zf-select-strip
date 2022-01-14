@@ -91,6 +91,10 @@ final class ZfSelectRector extends AbstractRector
             return true;
         }
 
+        if ($argType->getClassReflection() === null) {
+            return true;
+        }
+
         if ($argType->getClassReflection()->getName() !== Zend_Db_Table_Select::class && ! $argType->getClassReflection()->isSubclassOf(Zend_Db_Table_Select::class)) {
             return true;
         }
