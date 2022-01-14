@@ -80,6 +80,10 @@ final class ZfSelectReflection {
             return null;
         }
 
+        if ($tableClassReflection->isAbstract()) {
+            return null;
+        }
+
         $tableAbstract = $this->createTableAbstract($tableClassReflection);
         $select = new Zend_Db_Table_Select($tableAbstract);
 
