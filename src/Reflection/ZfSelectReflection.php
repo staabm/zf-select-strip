@@ -31,6 +31,7 @@ use Zend_Db_Table_Abstract;
 use Zend_Db_Table_Select;
 
 final class ZfSelectReflection {
+    // code partly copied from symplify/symplify .. use upstream package later
     /**
      * Do not change, part of internal PHPStan naming.
      *
