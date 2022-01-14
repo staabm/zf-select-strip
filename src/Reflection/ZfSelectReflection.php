@@ -91,16 +91,6 @@ final class ZfSelectReflection {
      */
     public function findSelectCreateAssign(Expr $expr): ?Assign
     {
-        // todo: use astral simpleNameResolver
-        $nameResolver = function (Node $node) {
-            if (\is_string($node->name)) {
-                return $node->name;
-            }
-            if ($node->name instanceof Node\Identifier) {
-                return $node->name->toString();
-            }
-        };
-
         $current = $expr;
         while (null !== $current) {
             /** @var Assign|null $assign */
@@ -108,11 +98,11 @@ final class ZfSelectReflection {
                 return $node instanceof Assign;
             });
 
-            if (null !== $assign) {
-                if ($expr instanceof MethodCall && $nameResolver($assign->var) === $nameResolver($expr->var)) {
+            if (null !== $assign && $this->resolveName($assign->var) !== null) {
+                if ($expr instanceof MethodCall && $this->resolveName($assign->var) === $this->resolveName($expr->var)) {
                     return $assign;
                 }
-                if ($expr instanceof Variable && $nameResolver($assign->var) === $nameResolver($expr)) {
+                if ($expr instanceof Variable && $this->resolveName($assign->var) === $this->resolveName($expr)) {
                     return $assign;
                 }
             }
@@ -120,6 +110,16 @@ final class ZfSelectReflection {
             $current = $assign;
         }
 
+        return null;
+    }
+
+    private function resolveName(Node $node):?string {
+        if (\is_string($node->name)) {
+            return $node->name;
+        }
+        if ($node->name instanceof Node\Identifier) {
+            return $node->name->toString();
+        }
         return null;
     }
 
