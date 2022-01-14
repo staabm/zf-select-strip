@@ -67,6 +67,11 @@ final class ZfSelectRector extends AbstractRector
 
         $selectCreateAssign->expr = new String_($fakeSelect->__toString());
 
+        $methodCalls = $zfSelectReflection->findOnSelectMethodCalls($selectCreateAssign);
+        foreach($methodCalls as $methodCall) {
+            $this->nodesToRemoveCollector->addNodeToRemove($methodCall);
+        }
+
         return $node;
     }
 

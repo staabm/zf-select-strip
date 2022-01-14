@@ -143,7 +143,7 @@ final class ZfSelectReflection {
     /**
      * @return MethodCall[]
      */
-    private function findOnSelectMethodCalls(Assign $selectCreate): array {
+    public function findOnSelectMethodCalls(Assign $selectCreate): array {
         $methodCalls = [];
 
         $current = $selectCreate;
