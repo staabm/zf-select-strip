@@ -61,7 +61,7 @@ final class ZfSelectReflection {
         $this->nodeFinder = new NodeFinder();
     }
 
-    public function fakeTableSelect(Assign $selectCreate, Scope $scope): ?Zend_Db_Table_Select {
+    public function tableSelectClone(Assign $selectCreate, Scope $scope): ?Zend_Db_Table_Select {
 
         $methodCall = $selectCreate->expr;
         if (!$methodCall instanceof MethodCall) {
