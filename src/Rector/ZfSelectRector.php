@@ -67,7 +67,7 @@ final class ZfSelectRector extends AbstractRector
         if ($selectCreateAssign === null) {
             return null;
         }
-        $selectClone = $zfSelectReflection->tableSelectClone($selectCreateAssign, $scope);
+        $selectClone = $zfSelectReflection->cloneTableSelect($selectCreateAssign, $scope);
         if ($selectClone === null) {
             return null;
         }

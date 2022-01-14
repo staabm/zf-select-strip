@@ -50,7 +50,7 @@ final class ZfSelectDynamicReturnTypeExtension implements DynamicMethodReturnTyp
             return $defaultReturn;
         }
 
-        $selectClone = $zfSelectReflection->tableSelectClone($selectCreateAssign, $scope);
+        $selectClone = $zfSelectReflection->cloneTableSelect($selectCreateAssign, $scope);
 
         if (null === $selectClone) {
             return $defaultReturn;
