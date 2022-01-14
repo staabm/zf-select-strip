@@ -305,7 +305,7 @@ final class ZfSelectReflection {
      */
     private function resolveName(Node $node):?string {
         if (!property_exists($node, 'name')) {
-            throw new ShouldNotHappenException();
+            return null;
         }
 
         if (\is_string($node->name)) {
