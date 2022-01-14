@@ -42,13 +42,12 @@ final class ZfSelectDynamicReturnTypeExtension implements DynamicMethodReturnTyp
 
     public function getTypeFromMethodCall(MethodReflection $methodReflection, MethodCall $methodCall, Scope $scope): Type
     {
-        $args = $methodCall->getArgs();
         $defaultReturn = ParametersAcceptorSelector::selectSingle($methodReflection->getVariants())->getReturnType();
 
         $zfSelectReflection = new ZfSelectReflection();
         $selectCreateAssign = $zfSelectReflection->findSelectCreateAssign($methodCall);
 
-        $fakeSelect = $zfSelectReflection->fakeTableSelect($selectCreateAssign->expr, $scope);
+        $fakeSelect = $zfSelectReflection->fakeTableSelect($selectCreateAssign, $scope);
 
         if (null === $fakeSelect) {
             return $defaultReturn;

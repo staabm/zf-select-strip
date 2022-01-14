@@ -42,9 +42,9 @@ final class ZfSelectReflection {
         $this->nodeFinder = new NodeFinder();
     }
 
-    public function fakeTableSelect(Expr $selectCreateExpr, Scope $scope): ?Zend_Db_Table_Select {
+    public function fakeTableSelect(Assign $selectCreate, Scope $scope): ?Zend_Db_Table_Select {
 
-        $tableClass = $selectCreateExpr->var;
+        $tableClass = $selectCreate->expr->var;
         $objectType = $scope->getType($tableClass);
 
         if (!$objectType instanceof ObjectType) {

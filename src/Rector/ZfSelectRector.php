@@ -63,7 +63,7 @@ final class ZfSelectRector extends AbstractRector
 
         $zfSelectReflection = new ZfSelectReflection();
         $selectCreateAssign = $zfSelectReflection->findSelectCreateAssign($tableSelectArg->value);
-        $fakeSelect = $zfSelectReflection->fakeTableSelect($selectCreateAssign->expr, $scope);
+        $fakeSelect = $zfSelectReflection->fakeTableSelect($selectCreateAssign, $scope);
 
         $selectCreateAssign->expr = new String_($fakeSelect->__toString());
 
