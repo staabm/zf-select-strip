@@ -49,6 +49,10 @@ final class ZfSelectRector extends AbstractRector
             return null;
         }
 
+        if (!$node->getArgs()[0]->value instanceof Variable) {
+            return true;
+        }
+
         $tableSelectArg = $node->getArgs()[0];
         $node->name = new Identifier('fetchRowByStatement');
 
@@ -57,10 +61,6 @@ final class ZfSelectRector extends AbstractRector
             [$tableSelectArg, new Arg(new Array_())]
         );
         $node->args[0] = new Arg($wrappedStatement);
-
-        if (!$tableSelectArg->value instanceof Variable) {
-            throw new ShouldNotHappenException();
-        }
 
         $zfSelectReflection = new ZfSelectReflection();
         $selectCreateAssign = $zfSelectReflection->findSelectCreateAssign($tableSelectArg->value);
