@@ -91,6 +91,10 @@ final class ZfSelectRector extends AbstractRector
             return true;
         }
 
+        if ($varType->getClassReflection() === null) {
+            return true;
+        }
+
         return !$varType->getClassReflection()->isSubclassOf(Clx_Model_Mapper_Abstract::class);
     }
 
