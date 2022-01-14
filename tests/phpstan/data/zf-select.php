@@ -90,4 +90,20 @@ class Foo {
  INNER JOIN `art` AS `e` ON a.artid = e.artid
  LEFT JOIN `artgroessebestand` AS `bestand` ON (k.artgroesseid = bestand.artgroesseid) WHERE (e.aktiv = 1) GROUP BY `b`.`artfarbeid` ORDER BY `f`.`sortierungid` ASC, `bezeichnung` ASC'", $select->__toString());
     }
+
+    function foo8()
+    {
+        $dbTable = new \DbTable();
+        $select = $dbTable->select();
+        $columns = [
+            'a.artid as artid',
+        ];
+
+        $select->from('ada as a', $columns);
+        $select->join('art as e', 'a.artid = e.artid', []);
+        $select->setIntegrityCheck(false);
+
+        assertType("'SELECT `a`.`artid` FROM `ada` AS `a`
+ INNER JOIN `art` AS `e` ON a.artid = e.artid'", $select->__toString());
+    }
 }

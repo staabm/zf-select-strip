@@ -94,7 +94,17 @@ final class ZfSelectReflection {
                     if (!$fromType instanceof ConstantStringType) {
                         return null;
                     }
-                    $select->from($fromType->getValue());
+
+                    $cols = Zend_Db_Table_Select::SQL_WILDCARD;
+                    if (count($args) >= 2) {
+                        $colsType = $scope->getType($args[1]->value);
+                        if (!$colsType instanceof ConstantArrayType) {
+                            return null;
+                        }
+                        $cols = $this->constantArrayToScalarArray($colsType);
+                    }
+
+                    $select->from($fromType->getValue(), $cols);
                     break;
                 }
                 case 'join':
