@@ -52,13 +52,6 @@ final class ZfSelectRector extends AbstractRector
         }
 
         $tableSelectArg = $node->getArgs()[0];
-        $node->name = new Identifier('fetchRowByStatement');
-
-        $wrappedStatement = new New_(
-            new Name(ClxProductNet_DbStatement::class),
-            [$tableSelectArg, new Arg(new Array_())]
-        );
-        $node->args[0] = new Arg($wrappedStatement);
 
         $zfSelectReflection = new ZfSelectReflection();
         $selectCreateAssign = $zfSelectReflection->findSelectCreateAssign($tableSelectArg->value);
@@ -69,6 +62,14 @@ final class ZfSelectRector extends AbstractRector
         if ($selectClone === null) {
             return null;
         }
+
+        $node->name = new Identifier('fetchRowByStatement');
+
+        $wrappedStatement = new New_(
+            new Name(ClxProductNet_DbStatement::class),
+            [$tableSelectArg, new Arg(new Array_())]
+        );
+        $node->args[0] = new Arg($wrappedStatement);
 
         $selectCreateAssign->expr = new String_($selectClone->__toString());
 
