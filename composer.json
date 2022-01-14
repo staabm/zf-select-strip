@@ -3,6 +3,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.0",
+        "nikic/php-parser": "^4.13",
         "phpstan/phpstan": "^1.2",
         "rector/rector": "^0.12",
         "zendframework/zendframework1": "^1.12"
