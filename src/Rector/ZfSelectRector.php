@@ -44,13 +44,8 @@ final class ZfSelectRector extends AbstractRector
 
         $scope = $node->getAttribute(AttributeKey::SCOPE);
         if (! $scope instanceof Scope) {
-            return false;
+            return null;
         }
-
-        /*
-        $newNode
-        $this->nodesToAddCollector->addNodeAfterNode($newNode, $node);
-*/
 
         $tableSelectArg = $node->args[0];
         $node->name = new Identifier('fetchRowByStatement');
@@ -63,6 +58,9 @@ final class ZfSelectRector extends AbstractRector
 
         $zfSelectReflection = new ZfSelectReflection();
         $selectCreateAssign = $zfSelectReflection->findSelectCreateAssign($tableSelectArg->value);
+        if ($selectCreateAssign === null) {
+            return null;
+        }
         $fakeSelect = $zfSelectReflection->fakeTableSelect($selectCreateAssign, $scope);
 
         $selectCreateAssign->expr = new String_($fakeSelect->__toString());
