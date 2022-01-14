@@ -52,7 +52,7 @@ final class ZfSelectReflection {
      * @see https://github.com/nikic/PHP-Parser/pull/681/files
      * @var string
      */
-    public const NEXT_NODE = 'next';
+    private const NEXT_NODE = 'next';
 
     private NodeFinder $nodeFinder;
 
