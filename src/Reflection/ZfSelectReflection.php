@@ -218,7 +218,7 @@ final class ZfSelectReflection {
      */
     private function constantArrayToScalarArray(ConstantArrayType $constantArrayType):array {
         $integerType = new IntegerType();
-        if (!$integerType->isSuperTypeOf($constantArrayType->getKeyType())) {
+        if ($integerType->isSuperTypeOf($constantArrayType->getKeyType())->no()) {
             // no array shape support yet
             throw new ShouldNotHappenException();
         }
