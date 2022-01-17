@@ -158,14 +158,17 @@ final class ZfSelectReflection {
                 }
                 case 'where':
                 {
-                    if (count($args) < 2) {
+                    if (count($args) < 1) {
                         return null;
                     }
                     $whereCondType = $scope->getType($args[0]->value);
                     if (!$whereCondType instanceof ConstantStringType) {
                         return null;
                     }
-                    $boundValues[] = $args[1]->value;
+
+                    if (count($args) > 1) {
+                        $boundValues[] = $args[1]->value;
+                    }
 
                     $select->where($whereCondType->getValue());
                     break;
