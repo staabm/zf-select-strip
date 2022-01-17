@@ -61,7 +61,10 @@ final class ZfSelectReflection {
         $this->nodeFinder = new NodeFinder();
     }
 
-    public function cloneTableSelect(Assign $selectCreate, Scope $scope): ?Zend_Db_Table_Select {
+    /**
+     * @param list<Expr> $boundValues
+     */
+    public function cloneTableSelect(Assign $selectCreate, Scope $scope, array &$boundValues): ?Zend_Db_Table_Select {
 
         $methodCall = $selectCreate->expr;
         if (!$methodCall instanceof MethodCall) {
@@ -159,14 +162,12 @@ final class ZfSelectReflection {
                         return null;
                     }
                     $whereCondType = $scope->getType($args[0]->value);
-                    $whereValueType = $scope->getType($args[1]->value);
                     if (!$whereCondType instanceof ConstantStringType) {
                         return null;
                     }
-                    if (!$whereValueType instanceof ConstantIntegerType) {
-                        return null;
-                    }
-                    $select->where($whereCondType->getValue(), $whereValueType->getValue());
+                    $boundValues[] = $args[1]->value;
+
+                    $select->where($whereCondType->getValue());
                     break;
                 }
                 case 'group':

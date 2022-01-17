@@ -58,16 +58,23 @@ final class ZfSelectRector extends AbstractRector
         if ($selectCreateAssign === null) {
             return null;
         }
-        $selectClone = $zfSelectReflection->cloneTableSelect($selectCreateAssign, $scope);
+
+        $boundValues = [];
+        $selectClone = $zfSelectReflection->cloneTableSelect($selectCreateAssign, $scope, $boundValues);
         if ($selectClone === null) {
             return null;
         }
 
         $node->name = new Identifier('fetchRowByStatement');
 
+        $items = [];
+        foreach($boundValues as $boundValue) {
+            $items[] = new Node\Expr\ArrayItem($boundValue);
+        }
+
         $wrappedStatement = new New_(
             new Name(ClxProductNet_DbStatement::class),
-            [$tableSelectArg, new Arg(new Array_())]
+            [$tableSelectArg, new Arg(new Array_($items))]
         );
         $node->args[0] = new Arg($wrappedStatement);
 
