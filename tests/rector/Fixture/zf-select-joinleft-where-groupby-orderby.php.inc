@@ -34,8 +34,8 @@ class Application_Model_Mapper_Artfarbe extends Clx_Model_Mapper_Abstract
         $dbTable = new \DbTable();
         $select = 'SELECT `a`.* FROM `ada` AS `a`
  INNER JOIN `art` AS `e` ON a.artid = e.artid
- LEFT JOIN `artgroessebestand` AS `bestand` ON (k.artgroesseid = bestand.artgroesseid) WHERE (e.aktiv = 1) GROUP BY `b`.`artfarbeid` ORDER BY `f`.`sortierungid` ASC, `bezeichnung` ASC';
+ LEFT JOIN `artgroessebestand` AS `bestand` ON (k.artgroesseid = bestand.artgroesseid) WHERE (e.aktiv = ?) GROUP BY `b`.`artfarbeid` ORDER BY `f`.`sortierungid` ASC, `bezeichnung` ASC';
 
-        return $this->fetchRowByStatement(new ClxProductNet_DbStatement($select, []));
+        return $this->fetchRowByStatement(new ClxProductNet_DbStatement($select, [1]));
     }
 }
