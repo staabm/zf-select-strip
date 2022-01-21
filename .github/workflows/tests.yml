@@ -49,9 +49,9 @@ jobs:
       - name: Setup Problem Matchers for PHPUnit
         run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
 
-          - name: Setup mysql
-            run: |
-              mysql -uroot -h127.0.0.1 -proot -e 'create database zf;'
-              mysql -uroot -h127.0.0.1 -proot zf < tests/schema.sql
+      - name: Setup mysql
+        run: |
+          mysql -uroot -h127.0.0.1 -proot -e 'create database zf;'
+          mysql -uroot -h127.0.0.1 -proot zf < tests/schema.sql
 
       - run: vendor/bin/phpunit
