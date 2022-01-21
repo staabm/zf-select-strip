@@ -54,4 +54,7 @@ jobs:
           mysql -uroot -h127.0.0.1 -proot -e 'create database zf;'
           mysql -uroot -h127.0.0.1 -proot zf < tests/schema.sql
 
-      - run: vendor/bin/phpunit
+      # separated test-suite for rector/phpstan required, to prevent nikic/php-parser version conflicts
+      # which lead to cannot "redeclare interface/class errors" of PhpParser\* classes
+      # see https://github.com/rectorphp/rector/discussions/6958
+      - run: composer phpunit
