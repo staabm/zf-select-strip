@@ -86,7 +86,7 @@ final class ZfSelectReflection
         $tableAbstract = $this->createTableAbstract($tableClassReflection);
 
         $selectArgs = $methodCall->getArgs();
-        if (count($selectArgs) >= 1) {
+        if (\count($selectArgs) >= 1) {
             $withFromPartArgType = $scope->getType($selectArgs[0]->value);
             if (!$withFromPartArgType instanceof ConstantBooleanType) {
                 throw new ShouldNotHappenException('Expected boolean constant');
