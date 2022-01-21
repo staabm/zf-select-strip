@@ -68,7 +68,7 @@ final class ZfSelectReflection {
 
         $methodCall = $selectCreate->expr;
         if (!$methodCall instanceof MethodCall) {
-            throw new ShouldNotHappenException();
+            throw new ShouldNotHappenException('Expected method call');
         }
 
         $tableClass = $methodCall->var;
@@ -93,7 +93,7 @@ final class ZfSelectReflection {
         foreach($this->findOnSelectMethodCalls($selectCreate) as $methodCall) {
             $methodName = $this->resolveName($methodCall->name);
             if($methodName === null) {
-                throw new ShouldNotHappenException();
+                throw new ShouldNotHappenException('Method name could not be resolved');
             }
             $args = $methodCall->getArgs();
 
@@ -140,13 +140,13 @@ final class ZfSelectReflection {
 
                     if ($joinColsType instanceof ConstantArrayType) {
                         if (!$joinColsType->isEmpty()) {
-                            throw new ShouldNotHappenException();
+                            throw new ShouldNotHappenException('Join columns should be empty');
                         }
                         $joinCols = [];
                     } elseif ($joinColsType instanceof ConstantStringType) {
                         $joinCols = $joinColsType->getValue();
                     } else {
-                        throw new ShouldNotHappenException();
+                        throw new ShouldNotHappenException('Join columns should be string or array');
                     }
 
                     if (strtolower($methodName) === 'join') {
@@ -204,7 +204,7 @@ final class ZfSelectReflection {
                     $flagType = $scope->getType($args[0]->value);
 
                     if (!$flagType instanceof ConstantBooleanType) {
-                        throw new ShouldNotHappenException();
+                        throw new ShouldNotHappenException('Integrity check flag should be boolean');
                     }
 
                     $select->setIntegrityCheck($flagType->getValue());
