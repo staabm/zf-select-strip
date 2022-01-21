@@ -31,27 +31,27 @@ jobs:
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
 
     steps:
-    - uses: actions/checkout@v2
-      with:
-        repository: ${{ github.event.client_payload.pull_request.head.repo.full_name }}
-        ref: ${{ github.event.client_payload.pull_request.head.ref }}
+      - uses: actions/checkout@v2
+        with:
+          repository: ${{ github.event.client_payload.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.client_payload.pull_request.head.ref }}
 
-    - name: Setup PHP
-      uses: shivammathur/setup-php@v2
-      with:
-        php-version: "${{ matrix.php-version }}"
-        coverage: none
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "${{ matrix.php-version }}"
+          coverage: none
 
-    - uses: "ramsey/composer-install@v2"
-      with:
-        composer-options: "--prefer-dist --no-progress"
+      - uses: "ramsey/composer-install@v2"
+        with:
+          composer-options: "--prefer-dist --no-progress"
 
-    - name: Setup Problem Matchers for PHPUnit
-      run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
+      - name: Setup Problem Matchers for PHPUnit
+        run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
 
-        - name: Setup mysql
-          run: |
-            mysql -uroot -h127.0.0.1 -proot -e 'create database zf;'
-            mysql -uroot -h127.0.0.1 -proot zf < tests/schema.sql
+          - name: Setup mysql
+            run: |
+              mysql -uroot -h127.0.0.1 -proot -e 'create database zf;'
+              mysql -uroot -h127.0.0.1 -proot zf < tests/schema.sql
 
-    - run: vendor/bin/phpunit
+      - run: vendor/bin/phpunit
