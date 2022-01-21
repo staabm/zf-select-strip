@@ -135,8 +135,7 @@ class Foo {
         $select->setIntegrityCheck(false);
 
         assertType("'SELECT `a`.*, `ada`.`spracheid` FROM `ada` AS `a`
-          INNER JOIN `art` AS `e` ON a.artid = e.artid
-          LEFT JOIN `artgroessebestand` AS `bestand` ON (k.artgroesseid = bestand.artgroesseid) WHERE (e.aktiv = ?)
-         GROUP BY `b`.`artfarbeid`'", $select->__toString());
+ INNER JOIN `art` AS `e` ON a.artid = e.artid
+ LEFT JOIN `artgroessebestand` AS `bestand` ON (k.artgroesseid = bestand.artgroesseid) WHERE (e.aktiv = ?) GROUP BY `b`.`artfarbeid`'", $select->__toString());
     }
 }
