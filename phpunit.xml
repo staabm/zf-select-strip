@@ -13,8 +13,11 @@
          verbose="false">
 
     <testsuites>
-        <testsuite name="ZfSelectStrip">
-            <directory suffix="Test.php">tests/</directory>
+        <testsuite name="phpstan">
+            <directory>tests/phpstan</directory>
+        </testsuite>
+        <testsuite name="rector">
+            <directory>tests/rector</directory>
         </testsuite>
     </testsuites>
 

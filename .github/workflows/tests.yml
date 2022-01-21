@@ -54,4 +54,5 @@ jobs:
           mysql -uroot -h127.0.0.1 -proot -e 'create database zf;'
           mysql -uroot -h127.0.0.1 -proot zf < tests/schema.sql
 
-      - run: vendor/bin/phpunit
+      - run: vendor/bin/phpunit --testsuite phpstan
+      - run: vendor/bin/phpunit --testsuite rector
