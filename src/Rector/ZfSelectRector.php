@@ -37,8 +37,7 @@ final class ZfSelectRector extends AbstractRector
     }
 
     /**
-     * @param MethodCall $node - we can add "MethodCall" type here, because
-     *                         only this node is in "getNodeTypes()"
+     * @param MethodCall $node
      */
     public function refactor(Node $node): ?Node
     {
