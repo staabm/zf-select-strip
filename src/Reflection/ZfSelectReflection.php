@@ -139,10 +139,7 @@ final class ZfSelectReflection {
                     }
 
                     if ($joinColsType instanceof ConstantArrayType) {
-                        if (!$joinColsType->isEmpty()) {
-                            throw new ShouldNotHappenException('Join columns should be empty');
-                        }
-                        $joinCols = [];
+                        $joinCols = $this->constantArrayToScalarArray($joinColsType);
                     } elseif ($joinColsType instanceof ConstantStringType) {
                         $joinCols = $joinColsType->getValue();
                     } else {
@@ -222,15 +219,13 @@ final class ZfSelectReflection {
     private function constantArrayToScalarArray(ConstantArrayType $constantArrayType):array {
         $integerType = new IntegerType();
         if ($integerType->isSuperTypeOf($constantArrayType->getKeyType())->no()) {
-            // no array shape support yet
-            throw new ShouldNotHappenException();
+            throw new ShouldNotHappenException('array shape is not yet supported');
         }
 
         $values = [];
         foreach($constantArrayType->getValueTypes() as $valueType) {
             if (!$valueType instanceof ConstantStringType) {
-                // no array shape support yet
-                throw new ShouldNotHappenException();
+                throw new ShouldNotHappenException('non string values not yet supported');
             }
             $values[] = $valueType->getValue();
         }
