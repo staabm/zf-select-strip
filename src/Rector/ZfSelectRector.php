@@ -9,10 +9,10 @@ use ClxProductNet_DbStatement;
 use PhpParser\Node;
 use PhpParser\Node\Arg;
 use PhpParser\Node\Expr\Array_;
+use PhpParser\Node\Expr\MethodCall;
 use PhpParser\Node\Expr\New_;
 use PhpParser\Node\Expr\Variable;
 use PhpParser\Node\Identifier;
-use PhpParser\Node\Expr\MethodCall;
 use PhpParser\Node\Name;
 use PhpParser\Node\Scalar\String_;
 use PHPStan\Analyser\Scope;
@@ -37,13 +37,12 @@ final class ZfSelectRector extends AbstractRector
     }
 
     /**
-     * @param MethodCall $node - we can add "MethodCall" type here, because
-     *                         only this node is in "getNodeTypes()"
+     * @param MethodCall $node
      */
     public function refactor(Node $node): ?Node
     {
         $scope = $node->getAttribute(AttributeKey::SCOPE);
-        if (! $scope instanceof Scope) {
+        if (!$scope instanceof Scope) {
             return null;
         }
 
@@ -52,23 +51,28 @@ final class ZfSelectRector extends AbstractRector
         }
 
         $tableSelectArg = $node->getArgs()[0];
+        $argExpr = $tableSelectArg->value;
+
+        if (!$argExpr instanceof MethodCall && !$argExpr instanceof Variable) {
+            return throw new ShouldNotHappenException('Expected "MethodCall" or "Variable"');
+        }
 
         $zfSelectReflection = new ZfSelectReflection();
-        $selectCreateAssign = $zfSelectReflection->findSelectCreateAssign($tableSelectArg->value);
-        if ($selectCreateAssign === null) {
+        $selectCreateAssign = $zfSelectReflection->findSelectCreateAssign($argExpr);
+        if (null === $selectCreateAssign) {
             return null;
         }
 
         $boundValues = [];
         $selectClone = $zfSelectReflection->cloneTableSelect($selectCreateAssign, $scope, $boundValues);
-        if ($selectClone === null) {
+        if (null === $selectClone) {
             return null;
         }
 
         $node->name = new Identifier('fetchRowByStatement');
 
         $items = [];
-        foreach($boundValues as $boundValue) {
+        foreach ($boundValues as $boundValue) {
             $items[] = new Node\Expr\ArrayItem($boundValue);
         }
 
@@ -81,7 +85,7 @@ final class ZfSelectRector extends AbstractRector
         $selectCreateAssign->expr = new String_($selectClone->__toString());
 
         $methodCalls = $zfSelectReflection->findOnSelectMethodCalls($selectCreateAssign);
-        foreach($methodCalls as $methodCall) {
+        foreach ($methodCalls as $methodCall) {
             $this->nodesToRemoveCollector->addNodeToRemove($methodCall);
         }
 
@@ -90,7 +94,7 @@ final class ZfSelectRector extends AbstractRector
 
     private function shouldSkip(MethodCall $methodCall, Scope $scope): bool
     {
-        if (count($methodCall->getArgs()) < 1) {
+        if (\count($methodCall->getArgs()) < 1) {
             return true;
         }
 
@@ -99,11 +103,11 @@ final class ZfSelectRector extends AbstractRector
             return true;
         }
 
-        if ($argType->getClassReflection() === null) {
+        if (null === $argType->getClassReflection()) {
             return true;
         }
 
-        if ($argType->getClassReflection()->getName() !== Zend_Db_Table_Select::class && ! $argType->getClassReflection()->isSubclassOf(Zend_Db_Table_Select::class)) {
+        if (Zend_Db_Table_Select::class !== $argType->getClassReflection()->getName() && !$argType->getClassReflection()->isSubclassOf(Zend_Db_Table_Select::class)) {
             return true;
         }
 
