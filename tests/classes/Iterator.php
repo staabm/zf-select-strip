@@ -1,3 +1,5 @@
 <?php
 
-class Clx_Model_Iterator {}
+class Clx_Model_Iterator
+{
+}

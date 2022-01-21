@@ -1,9 +1,9 @@
 <?php
+
 // rector.php
 
 declare(strict_types=1);
 
-use Rector\Core\Configuration\Option;
 use staabm\ZfSelectStrip\Rector\ZfSelectRector;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 

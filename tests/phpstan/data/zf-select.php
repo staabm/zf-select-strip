@@ -4,8 +4,9 @@ namespace ZfSelectPHPStanInference;
 
 use function PHPStan\Testing\assertType;
 
-class Foo {
-    function foo1()
+class Foo
+{
+    public function foo1()
     {
         $dbTable = new \DbTable();
         $select = $dbTable->select();
@@ -13,7 +14,7 @@ class Foo {
         assertType("'SELECT `ada`.* FROM `ada`'", $select->__toString());
     }
 
-    function foo2()
+    public function foo2()
     {
         $dbTable = new \DbTable();
         $select = $dbTable->select();
@@ -22,7 +23,7 @@ class Foo {
         assertType("'SELECT `a`.* FROM `ada` AS `a`'", $select->__toString());
     }
 
-    function foo3()
+    public function foo3()
     {
         $dbTable = new \DbTable();
         $select = $dbTable->select();
@@ -33,7 +34,7 @@ class Foo {
  INNER JOIN `art` AS `e` ON a.artid = e.artid'", $select->__toString());
     }
 
-    function foo4()
+    public function foo4()
     {
         $dbTable = new \DbTable();
         $select = $dbTable->select();
@@ -46,7 +47,7 @@ class Foo {
  LEFT JOIN `artgroessebestand` AS `bestand` ON (k.artgroesseid = bestand.artgroesseid)'", $select->__toString());
     }
 
-    function foo5()
+    public function foo5()
     {
         $dbTable = new \DbTable();
         $select = $dbTable->select();
@@ -60,7 +61,7 @@ class Foo {
  LEFT JOIN `artgroessebestand` AS `bestand` ON (k.artgroesseid = bestand.artgroesseid) WHERE (e.aktiv = ?)'", $select->__toString());
     }
 
-    function foo6()
+    public function foo6()
     {
         $dbTable = new \DbTable();
         $select = $dbTable->select();
@@ -75,7 +76,7 @@ class Foo {
  LEFT JOIN `artgroessebestand` AS `bestand` ON (k.artgroesseid = bestand.artgroesseid) WHERE (e.aktiv = ?) GROUP BY `b`.`artfarbeid`'", $select->__toString());
     }
 
-    function foo7()
+    public function foo7()
     {
         $dbTable = new \DbTable();
         $select = $dbTable->select();
@@ -91,7 +92,7 @@ class Foo {
  LEFT JOIN `artgroessebestand` AS `bestand` ON (k.artgroesseid = bestand.artgroesseid) WHERE (e.aktiv = ?) GROUP BY `b`.`artfarbeid` ORDER BY `f`.`sortierungid` ASC, `bezeichnung` ASC'", $select->__toString());
     }
 
-    function foo8()
+    public function foo8()
     {
         $dbTable = new \DbTable();
         $select = $dbTable->select();
@@ -107,7 +108,7 @@ class Foo {
  INNER JOIN `art` AS `e` ON a.artid = e.artid'", $select->__toString());
     }
 
-    function foo9(int $aktiv)
+    public function foo9(int $aktiv)
     {
         $dbTable = new \DbTable();
         $select = $dbTable->select();
@@ -123,7 +124,7 @@ class Foo {
  LEFT JOIN `artgroessebestand` AS `bestand` ON (k.artgroesseid = bestand.artgroesseid) WHERE (e.aktiv = ?) GROUP BY `b`.`artfarbeid`'", $select->__toString());
     }
 
-    function foo10(int $aktiv)
+    public function foo10(int $aktiv)
     {
         $dbTable = new \DbTable();
         $select = $dbTable->select();

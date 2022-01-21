@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace staabm\ZfSelectStrip\Reflection;
 
-
-use PhpParser\Builder\Method;
 use PhpParser\Node;
 use PhpParser\Node\Expr;
 use PhpParser\Node\Expr\Assign;
@@ -13,25 +11,21 @@ use PhpParser\Node\Expr\MethodCall;
 use PhpParser\Node\Expr\Variable;
 use PhpParser\Node\FunctionLike;
 use PhpParser\Node\Stmt\Return_;
-use PhpParser\NodeDumper;
 use PhpParser\NodeFinder;
-use PhpParser\PrettyPrinter\Standard;
 use PHPStan\Analyser\Scope;
 use PHPStan\Reflection\ClassReflection;
 use PHPStan\ShouldNotHappenException;
 use PHPStan\Type\Constant\ConstantArrayType;
 use PHPStan\Type\Constant\ConstantBooleanType;
-use PHPStan\Type\Constant\ConstantIntegerType;
 use PHPStan\Type\Constant\ConstantStringType;
 use PHPStan\Type\IntegerType;
 use PHPStan\Type\ObjectType;
-use PHPStan\Type\TypeUtils;
-use PHPStan\Type\VerbosityLevel;
 use ReflectionClass;
 use Zend_Db_Table_Abstract;
 use Zend_Db_Table_Select;
 
-final class ZfSelectReflection {
+final class ZfSelectReflection
+{
     // code partly copied from symplify/symplify .. use upstream package later
     /**
      * Do not change, part of internal PHPStan naming.
@@ -49,7 +43,9 @@ final class ZfSelectReflection {
 
     /**
      * @internal of php-parser, do not change
+     *
      * @see https://github.com/nikic/PHP-Parser/pull/681/files
+     *
      * @var string
      */
     private const NEXT_NODE = 'next';
@@ -64,8 +60,8 @@ final class ZfSelectReflection {
     /**
      * @param list<Expr> $boundValues
      */
-    public function cloneTableSelect(Assign $selectCreate, Scope $scope, array &$boundValues): ?Zend_Db_Table_Select {
-
+    public function cloneTableSelect(Assign $selectCreate, Scope $scope, array &$boundValues): ?Zend_Db_Table_Select
+    {
         $methodCall = $selectCreate->expr;
         if (!$methodCall instanceof MethodCall) {
             throw new ShouldNotHappenException('Expected method call');
@@ -79,7 +75,7 @@ final class ZfSelectReflection {
         }
 
         $tableClassReflection = $objectType->getClassReflection();
-        if ($tableClassReflection === null || !$tableClassReflection->isSubclassOf(Zend_Db_Table_Abstract::class)) {
+        if (null === $tableClassReflection || !$tableClassReflection->isSubclassOf(Zend_Db_Table_Abstract::class)) {
             return null;
         }
 
@@ -90,17 +86,16 @@ final class ZfSelectReflection {
         $tableAbstract = $this->createTableAbstract($tableClassReflection);
         $select = new Zend_Db_Table_Select($tableAbstract);
 
-        foreach($this->findOnSelectMethodCalls($selectCreate) as $methodCall) {
+        foreach ($this->findOnSelectMethodCalls($selectCreate) as $methodCall) {
             $methodName = $this->resolveName($methodCall->name);
-            if($methodName === null) {
+            if (null === $methodName) {
                 throw new ShouldNotHappenException('Method name could not be resolved');
             }
             $args = $methodCall->getArgs();
 
-            switch(strtolower($methodName)) {
+            switch (strtolower($methodName)) {
                 case 'from':
-                {
-                    if (count($args) < 1) {
+                    if (\count($args) < 1) {
                         return null;
                     }
                     $fromType = $scope->getType($args[0]->value);
@@ -109,7 +104,7 @@ final class ZfSelectReflection {
                     }
 
                     $cols = Zend_Db_Table_Select::SQL_WILDCARD;
-                    if (count($args) >= 2) {
+                    if (\count($args) >= 2) {
                         $colsType = $scope->getType($args[1]->value);
                         if (!$colsType instanceof ConstantArrayType) {
                             return null;
@@ -119,11 +114,10 @@ final class ZfSelectReflection {
 
                     $select->from($fromType->getValue(), $cols);
                     break;
-                }
+
                 case 'join':
                 case 'joinleft':
-                {
-                    if (count($args) < 3) {
+                    if (\count($args) < 3) {
                         return null;
                     }
 
@@ -146,16 +140,15 @@ final class ZfSelectReflection {
                         throw new ShouldNotHappenException('Join columns should be string or array');
                     }
 
-                    if (strtolower($methodName) === 'join') {
+                    if ('join' === strtolower($methodName)) {
                         $select->join($joinNameType->getValue(), $joinConditionsType->getValue(), $joinCols);
                     } else {
                         $select->joinLeft($joinNameType->getValue(), $joinConditionsType->getValue(), $joinCols);
                     }
                     break;
-                }
+
                 case 'where':
-                {
-                    if (count($args) < 1) {
+                    if (\count($args) < 1) {
                         return null;
                     }
                     $whereCondType = $scope->getType($args[0]->value);
@@ -163,17 +156,16 @@ final class ZfSelectReflection {
                         return null;
                     }
 
-                    if (count($args) > 1) {
+                    if (\count($args) > 1) {
                         $boundValues[] = $args[1]->value;
                     }
 
                     $select->where($whereCondType->getValue());
                     break;
-                }
+
                 case 'group':
                 case 'order':
-                {
-                    if (count($args) < 1) {
+                    if (\count($args) < 1) {
                         return null;
                     }
                     $specType = $scope->getType($args[0]->value);
@@ -186,16 +178,15 @@ final class ZfSelectReflection {
                         return null;
                     }
 
-                    if (strtolower($methodName) === 'group') {
+                    if ('group' === strtolower($methodName)) {
                         $select->group($spec);
                     } else {
                         $select->order($spec);
                     }
                     break;
-                }
+
                 case 'setintegritycheck':
-                {
-                    if (count($args) < 1) {
+                    if (\count($args) < 1) {
                         return null;
                     }
                     $flagType = $scope->getType($args[0]->value);
@@ -205,7 +196,6 @@ final class ZfSelectReflection {
                     }
 
                     $select->setIntegrityCheck($flagType->getValue());
-                }
             }
         }
 
@@ -213,22 +203,23 @@ final class ZfSelectReflection {
     }
 
     /**
-     * @param ConstantArrayType $constantArrayType
      * @return scalar[]
      */
-    private function constantArrayToScalarArray(ConstantArrayType $constantArrayType):array {
+    private function constantArrayToScalarArray(ConstantArrayType $constantArrayType): array
+    {
         $integerType = new IntegerType();
         if ($integerType->isSuperTypeOf($constantArrayType->getKeyType())->no()) {
             throw new ShouldNotHappenException('array shape is not yet supported');
         }
 
         $values = [];
-        foreach($constantArrayType->getValueTypes() as $valueType) {
+        foreach ($constantArrayType->getValueTypes() as $valueType) {
             if (!$valueType instanceof ConstantStringType) {
                 throw new ShouldNotHappenException('non string values not yet supported');
             }
             $values[] = $valueType->getValue();
         }
+
         return $values;
     }
 
@@ -244,7 +235,7 @@ final class ZfSelectReflection {
                 return $node instanceof Assign;
             });
 
-            if (null !== $assign && $this->resolveName($assign->var) !== null) {
+            if (null !== $assign && null !== $this->resolveName($assign->var)) {
                 if ($expr instanceof MethodCall && $this->resolveName($assign->var) === $this->resolveName($expr->var)) {
                     return $assign;
                 }
@@ -259,31 +250,35 @@ final class ZfSelectReflection {
         return null;
     }
 
-    private function createTableAbstract(ClassReflection $tableClassReflection) : Zend_Db_Table_Abstract {
+    private function createTableAbstract(ClassReflection $tableClassReflection): Zend_Db_Table_Abstract
+    {
         $reflectionClass = new ReflectionClass($tableClassReflection->getName());
         $instance = $reflectionClass->newInstance();
         if (!$instance instanceof Zend_Db_Table_Abstract) {
             throw new ShouldNotHappenException();
         }
+
         return $instance;
     }
 
     /**
      * @return MethodCall[]
      */
-    public function findOnSelectMethodCalls(Assign $selectCreate): array {
+    public function findOnSelectMethodCalls(Assign $selectCreate): array
+    {
         $methodCalls = [];
 
         $current = $selectCreate;
         do {
-            $methodCall = $this->findFirstNext($current, function (Node $node) use ($selectCreate):bool {
+            $methodCall = $this->findFirstNext($current, function (Node $node) use ($selectCreate): bool {
                 if ($node instanceof MethodCall && $this->resolveName($node->var) === $this->resolveName($selectCreate->var)) {
                     return true;
                 }
+
                 return false;
             });
 
-            if ($methodCall !== null) {
+            if (null !== $methodCall) {
                 if (!$methodCall instanceof MethodCall) {
                     throw new ShouldNotHappenException();
                 }
@@ -291,15 +286,13 @@ final class ZfSelectReflection {
                 $methodCalls[] = $methodCall;
                 $current = $methodCall;
             }
-        } while ($methodCall !== null);
+        } while (null !== $methodCall);
 
         return $methodCalls;
     }
 
-    /**
-     * @param Node $node
-     */
-    private function resolveName(Node $node):?string {
+    private function resolveName(Node $node): ?string
+    {
         if (!property_exists($node, 'name')) {
             return null;
         }
@@ -318,7 +311,7 @@ final class ZfSelectReflection {
     {
         $next = $node->getAttribute(self::NEXT_NODE);
         if ($next instanceof Node) {
-            if ($next instanceof Return_ && $next->expr === null) {
+            if ($next instanceof Return_ && null === $next->expr) {
                 return null;
             }
 

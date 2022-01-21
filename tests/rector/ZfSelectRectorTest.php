@@ -6,7 +6,8 @@ use Iterator;
 use Rector\Testing\PHPUnit\AbstractRectorTestCase;
 use Symplify\SmartFileSystem\SmartFileInfo;
 
-final class ZfSelectRectorTest extends AbstractRectorTestCase {
+final class ZfSelectRectorTest extends AbstractRectorTestCase
+{
     /**
      * @dataProvider provideData()
      */
@@ -20,11 +21,11 @@ final class ZfSelectRectorTest extends AbstractRectorTestCase {
      */
     public function provideData(): Iterator
     {
-        return $this->yieldFilesFromDirectory(__DIR__ . '/Fixture');
+        return $this->yieldFilesFromDirectory(__DIR__.'/Fixture');
     }
 
     public function provideConfigFilePath(): string
     {
-        return __DIR__ . '/config/configured_rule.php';
+        return __DIR__.'/config/configured_rule.php';
     }
 }
