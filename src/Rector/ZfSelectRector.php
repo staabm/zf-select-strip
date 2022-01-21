@@ -54,7 +54,7 @@ final class ZfSelectRector extends AbstractRector
         $argExpr = $tableSelectArg->value;
 
         if (!$argExpr instanceof MethodCall && !$argExpr instanceof Variable) {
-            return throw new ShouldNotHappenException('Expected "MethodCall" or "Variable"');
+            throw new ShouldNotHappenException('Expected "MethodCall" or "Variable"');
         }
 
         $zfSelectReflection = new ZfSelectReflection();
