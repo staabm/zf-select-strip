@@ -112,15 +112,17 @@ final class ZfSelectRector extends AbstractRector
         }
 
         $varType = $this->nodeTypeResolver->getType($methodCall->var);
-        if (!$varType instanceof ThisType) {
-            return true;
+        if ($varType instanceof ThisType || $varType instanceof ObjectType) {
+            if ($varType->getClassReflection() === null) {
+                return true;
+            }
+
+            if ($varType->getClassReflection()->isSubclassOf(Clx_Model_Mapper_Abstract::class)) {
+                return false;
+            }
         }
 
-        if ($varType->getClassReflection() === null) {
-            return true;
-        }
-
-        return !$varType->getClassReflection()->isSubclassOf(Clx_Model_Mapper_Abstract::class);
+        return true;
     }
 
     /**
