@@ -53,6 +53,10 @@ final class ZfSelectRector extends AbstractRector
 
         $tableSelectArg = $node->getArgs()[0];
 
+        if (! $tableSelectArg instanceof MethodCall && ! $tableSelectArg instanceof Variable) {
+            return throw new ShouldNotHappenException('Expected "MethodCall" or "Variable"');
+        }
+
         $zfSelectReflection = new ZfSelectReflection();
         $selectCreateAssign = $zfSelectReflection->findSelectCreateAssign($tableSelectArg->value);
         if ($selectCreateAssign === null) {
