@@ -29,7 +29,7 @@ class ZfInferenceTest extends TypeInferenceTestCase
     public static function getAdditionalConfigFiles(): array
     {
         return [
-            __DIR__ . '/../../config/extensions.neon',
+            __DIR__.'/../../config/extensions.neon',
         ];
     }
 }

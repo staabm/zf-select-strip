@@ -33,6 +33,5 @@ abstract class Clx_Model_Mapper_Abstract
      */
     final public function fetchAllByStatement(ClxProductNet_DbStatement $stmt)
     {
-
     }
 }
