@@ -17,6 +17,7 @@ use PHPStan\Reflection\ClassReflection;
 use PHPStan\ShouldNotHappenException;
 use PHPStan\Type\Constant\ConstantArrayType;
 use PHPStan\Type\Constant\ConstantBooleanType;
+use PHPStan\Type\Constant\ConstantIntegerType;
 use PHPStan\Type\Constant\ConstantStringType;
 use PHPStan\Type\IntegerType;
 use PHPStan\Type\ObjectType;
@@ -195,6 +196,33 @@ final class ZfSelectReflection
                     }
                     break;
 
+                case 'limit':
+                    if (\count($args) < 1) {
+                        return null;
+                    }
+
+                    $limitType = $scope->getType($args[0]->value);
+                    if (!$limitType instanceof ConstantIntegerType) {
+                        throw new ShouldNotHappenException('Limit should be an integer');
+                    }
+                    $limit = $limitType->getValue();
+
+                    $offset = null;
+                    if (\count($args) >= 2) {
+                        $offsetType = $scope->getType($args[1]->value);
+                        if (!$offsetType instanceof ConstantIntegerType) {
+                            throw new ShouldNotHappenException('Offset should be an integer');
+                        }
+                        $offset = $offsetType->getValue();
+                    }
+
+                    if (null !== $offset) {
+                        $select->limit($limit, $offset);
+                    } else {
+                        $select->limit($limit);
+                    }
+
+                    break;
                 case 'setintegritycheck':
                     if (\count($args) < 1) {
                         return null;
