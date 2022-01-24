@@ -239,7 +239,7 @@ final class ZfSelectReflection
                     // prevent default-exception
                     break;
                 default:
-                    throw new ShouldNotHappenException('Unsupported method "'.$methodName .'"');
+                    throw new ShouldNotHappenException('Unsupported method "'.$methodName.'"');
             }
         }
 
