@@ -155,4 +155,24 @@ class Foo
  INNER JOIN `art` AS `e` ON a.artid = e.artid
  LEFT JOIN `artgroessebestand` AS `bestand` ON (k.artgroesseid = bestand.artgroesseid) WHERE (e.aktiv = ?) GROUP BY `b`.`artfarbeid`'", $select->__toString());
     }
+
+    public function foo12()
+    {
+        $dbTable = new \DbTable();
+        $select = $dbTable->select();
+        $select->limit(1);
+
+        assertType("'SELECT `ada`.* FROM `ada` LIMIT 1'", $select->__toString());
+    }
+
+    public function foo13()
+    {
+        $dbTable = new \DbTable();
+        $select = $dbTable->select();
+        $select->join('art as e', 'a.artid = e.artid', []);
+        $select->limit(1, 2);
+
+        assertType("'SELECT `ada`.* FROM `art` AS `e`
+ INNER JOIN `ada` LIMIT 1 OFFSET 2'", $select->__toString());
+    }
 }
