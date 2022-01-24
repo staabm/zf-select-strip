@@ -235,7 +235,7 @@ final class ZfSelectReflection
 
                     $select->setIntegrityCheck($flagType->getValue());
                     break;
-                case '__toString':
+                case '__tostring':
                     // prevent default-exception
                     break;
                 default:
