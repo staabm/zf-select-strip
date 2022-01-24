@@ -234,6 +234,12 @@ final class ZfSelectReflection
                     }
 
                     $select->setIntegrityCheck($flagType->getValue());
+                    break;
+                case '__tostring':
+                    // prevent default-exception
+                    break;
+                default:
+                    throw new ShouldNotHappenException('Unsupported method "'.$methodName.'"');
             }
         }
 
