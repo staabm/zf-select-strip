@@ -128,13 +128,12 @@ final class ZfSelectReflection
 
                 case 'join':
                 case 'joinleft':
-                    if (\count($args) < 3) {
+                    if (\count($args) < 2) {
                         return null;
                     }
 
                     $joinNameType = $scope->getType($args[0]->value);
                     $joinConditionsType = $scope->getType($args[1]->value);
-                    $joinColsType = $scope->getType($args[2]->value);
 
                     if (!$joinNameType instanceof ConstantStringType) {
                         return null;
@@ -143,12 +142,16 @@ final class ZfSelectReflection
                         return null;
                     }
 
-                    if ($joinColsType instanceof ConstantArrayType) {
-                        $joinCols = $this->constantArrayToScalarArray($joinColsType);
-                    } elseif ($joinColsType instanceof ConstantStringType) {
-                        $joinCols = $joinColsType->getValue();
-                    } else {
-                        throw new ShouldNotHappenException('Join columns should be string or array');
+                    $joinCols = '*';
+                    if (\count($args) >= 3) {
+                        $joinColsType = $scope->getType($args[2]->value);
+                        if ($joinColsType instanceof ConstantArrayType) {
+                            $joinCols = $this->constantArrayToScalarArray($joinColsType);
+                        } elseif ($joinColsType instanceof ConstantStringType) {
+                            $joinCols = $joinColsType->getValue();
+                        } else {
+                            throw new ShouldNotHappenException('Join columns should be string or array');
+                        }
                     }
 
                     if ('join' === strtolower($methodName)) {
