@@ -69,7 +69,12 @@ final class ZfSelectRector extends AbstractRector
             return null;
         }
 
-        $node->name = new Identifier('fetchRowByStatement');
+        if ($this->nodeNameResolver->isName($node->name, 'fetchRow')) {
+            $node->name = new Identifier('fetchRowByStatement');
+        }
+        if ($this->nodeNameResolver->isName($node->name, 'fetchAll')) {
+            $node->name = new Identifier('fetchAllByStatement');
+        }
 
         $items = [];
         foreach ($boundValues as $boundValue) {
@@ -111,7 +116,7 @@ final class ZfSelectRector extends AbstractRector
             return true;
         }
 
-        if (!$this->nodeNameResolver->isName($methodCall->name, 'fetchRow')) {
+        if (!$this->nodeNameResolver->isName($methodCall->name, 'fetchRow') && !$this->nodeNameResolver->isName($methodCall->name, 'fetchAll')) {
             return true;
         }
 
