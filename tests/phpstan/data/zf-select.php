@@ -175,4 +175,16 @@ class Foo
         assertType("'SELECT `ada`.* FROM `art` AS `e`
  INNER JOIN `ada` LIMIT 1 OFFSET 2'", $select->__toString());
     }
+
+    public function joinNoCols()
+    {
+        $dbTable = new \DbTable();
+        $select = $dbTable->select();
+        $select->setIntegrityCheck(false);
+        $select->from('ada as a');
+        $select->join('art as e', 'a.artid = e.artid');
+
+        assertType("'SELECT `a`.*, `e`.* FROM `ada` AS `a`
+ INNER JOIN `art` AS `e` ON a.artid = e.artid'", $select->__toString());
+    }
 }
