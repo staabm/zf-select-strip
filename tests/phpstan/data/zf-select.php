@@ -175,4 +175,18 @@ class Foo
         assertType("'SELECT `ada`.* FROM `art` AS `e`
  INNER JOIN `ada` LIMIT 1 OFFSET 2'", $select->__toString());
     }
+
+    public function foo14(int $aktiv)
+    {
+        $dbTable = new \DbTable();
+        $select = $dbTable->select();
+        $select->setIntegrityCheck(false)
+            ->join('art as e', 'a.artid = e.artid', ['ada.spracheid as spracheid'])
+            ->joinLeft('artgroessebestand as bestand', '(k.artgroesseid = bestand.artgroesseid)', [])
+            ->where('e.aktiv = ?', $aktiv)
+            ->group('b.artfarbeid');
+
+        assertType("'SELECT `ada`.* FROM `art` AS `e`
+ INNER JOIN `ada` LIMIT 1 OFFSET 2'", $select->__toString());
+    }
 }
