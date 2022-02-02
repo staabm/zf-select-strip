@@ -128,6 +128,7 @@ final class ZfSelectReflection
 
                 case 'join':
                 case 'joinleft':
+                case 'joininner':
                     if (\count($args) < 2) {
                         return null;
                     }
@@ -156,6 +157,8 @@ final class ZfSelectReflection
 
                     if ('join' === strtolower($methodName)) {
                         $select->join($joinNameType->getValue(), $joinConditionsType->getValue(), $joinCols);
+                    } elseif ('joininner' === strtolower($methodName)) {
+                        $select->joinInner($joinNameType->getValue(), $joinConditionsType->getValue(), $joinCols);
                     } else {
                         $select->joinLeft($joinNameType->getValue(), $joinConditionsType->getValue(), $joinCols);
                     }
