@@ -187,4 +187,15 @@ class Foo
         assertType("'SELECT `a`.*, `e`.* FROM `ada` AS `a`
  INNER JOIN `art` AS `e` ON a.artid = e.artid'", $select->__toString());
     }
+
+    public function joinInner()
+    {
+        $dbTable = new \DbTable();
+        $select = $dbTable->select();
+        $select->from('ada as a');
+        $select->joinInner('art as e', 'a.artid = e.artid', []);
+
+        assertType("'SELECT `a`.* FROM `ada` AS `a`
+ INNER JOIN `art` AS `e` ON a.artid = e.artid'", $select->__toString());
+    }
 }
