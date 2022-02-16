@@ -25,6 +25,7 @@ use ReflectionClass;
 use Zend_Db_Table_Abstract;
 use Zend_Db_Table_Select;
 use sprintf;
+use get_class;
 
 final class ZfSelectReflection
 {
