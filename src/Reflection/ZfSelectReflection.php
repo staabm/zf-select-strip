@@ -24,6 +24,7 @@ use PHPStan\Type\ObjectType;
 use ReflectionClass;
 use Zend_Db_Table_Abstract;
 use Zend_Db_Table_Select;
+use sprintf;
 
 final class ZfSelectReflection
 {
