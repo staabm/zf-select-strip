@@ -65,7 +65,7 @@ final class ZfSelectReflection
     {
         $methodCall = $selectCreate->expr;
         if (!$methodCall instanceof MethodCall) {
-            throw new ShouldNotHappenException('Expected method call');
+            throw new ShouldNotHappenException(sprintf('Expected method call, got %s.', get_class($methodCall)));
         }
 
         $tableClass = $methodCall->var;
