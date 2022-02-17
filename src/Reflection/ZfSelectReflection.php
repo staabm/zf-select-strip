@@ -140,7 +140,14 @@ final class ZfSelectReflection
                         return null;
                     }
                     if (!$joinConditionsType instanceof ConstantStringType) {
-                        return null;
+                        if ($args[1]->value instanceof Expr\BinaryOp\Concat) {
+                            $joinConditionsType = $this->resolveConcat($args[1]->value, $scope, $boundValues);
+                            if (!$joinConditionsType instanceof ConstantStringType) {
+                                return null;
+                            }
+                        } else {
+                            return null;
+                        }
                     }
 
                     $joinCols = '*';
@@ -250,6 +257,47 @@ final class ZfSelectReflection
         }
 
         return $select;
+    }
+
+    /**
+     * @param list<Expr> $boundValues
+     */
+    private function resolveConcat(Expr\BinaryOp\Concat $expr, Scope $scope, array &$boundValues): ?ConstantStringType
+    {
+        $leftType = $scope->getType($expr->left);
+        $rightType = $scope->getType($expr->right);
+
+        if ($expr->left instanceof Expr\BinaryOp\Concat && $rightType instanceof ConstantStringType) {
+            $left = $this->resolveConcat($expr->left, $scope, $boundValues);
+            if (null === $left) {
+                return null;
+            }
+
+            return new ConstantStringType($left->getValue().$rightType->getValue());
+        }
+        if ($expr->right instanceof Expr\BinaryOp\Concat && $leftType instanceof ConstantStringType) {
+            $right = $this->resolveConcat($expr->right, $scope, $boundValues);
+            if (null === $right) {
+                return null;
+            }
+
+            return new ConstantStringType($leftType->getValue().$right->getValue());
+        }
+
+        if ($leftType instanceof ConstantStringType || $rightType instanceof ConstantStringType) {
+            if ($expr->left instanceof MethodCall && $rightType instanceof ConstantStringType) {
+                $boundValues[] = $expr->left;
+
+                return new ConstantStringType('?'.$rightType->getValue());
+            }
+            if ($leftType instanceof ConstantStringType && $expr->right instanceof MethodCall) {
+                $boundValues[] = $expr->right;
+
+                return new ConstantStringType($leftType->getValue().'?');
+            }
+        }
+
+        return null;
     }
 
     /**

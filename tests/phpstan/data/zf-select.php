@@ -198,4 +198,26 @@ class Foo
         assertType("'SELECT `a`.* FROM `ada` AS `a`
  INNER JOIN `art` AS `e` ON a.artid = e.artid'", $select->__toString());
     }
+
+    public function joinConcat()
+    {
+        $dbTable = new \DbTable();
+        $select = $dbTable->select();
+        $select->setIntegrityCheck(false);
+        $select->from('ada as a');
+        $select->join('art as e', '(a.artid = e.artid AND e.artid='.$this->t_getSpracheId().')');
+
+        assertType("'SELECT `a`.*, `e`.* FROM `ada` AS `a`
+ INNER JOIN `art` AS `e` ON (a.artid = e.artid AND e.artid=?)'", $select->__toString());
+    }
+
+    // --- test fixtures
+
+    /**
+     * @return int|string
+     */
+    public function t_getSpracheId()
+    {
+        return 123;
+    }
 }
