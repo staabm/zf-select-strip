@@ -24,8 +24,6 @@ use PHPStan\Type\ObjectType;
 use ReflectionClass;
 use Zend_Db_Table_Abstract;
 use Zend_Db_Table_Select;
-use sprintf;
-use get_class;
 
 final class ZfSelectReflection
 {
@@ -67,7 +65,7 @@ final class ZfSelectReflection
     {
         $methodCall = $selectCreate->expr;
         if (!$methodCall instanceof MethodCall) {
-            throw new ShouldNotHappenException(sprintf('Expected method call, got %s.', get_class($methodCall)));
+            throw new ShouldNotHappenException(sprintf('Expected method call, got %s.', \get_class($methodCall)));
         }
 
         $tableClass = $methodCall->var;
