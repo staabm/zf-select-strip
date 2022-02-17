@@ -199,7 +199,8 @@ class Foo
  INNER JOIN `art` AS `e` ON a.artid = e.artid'", $select->__toString());
     }
 
-    public function joinConcat() {
+    public function joinConcat()
+    {
         $dbTable = new \DbTable();
         $select = $dbTable->select();
         $select->setIntegrityCheck(false);

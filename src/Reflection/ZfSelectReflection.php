@@ -21,7 +21,6 @@ use PHPStan\Type\Constant\ConstantIntegerType;
 use PHPStan\Type\Constant\ConstantStringType;
 use PHPStan\Type\IntegerType;
 use PHPStan\Type\ObjectType;
-use PHPStan\Type\VerbosityLevel;
 use ReflectionClass;
 use Zend_Db_Table_Abstract;
 use Zend_Db_Table_Select;
@@ -270,17 +269,19 @@ final class ZfSelectReflection
 
         if ($expr->left instanceof Expr\BinaryOp\Concat && $rightType instanceof ConstantStringType) {
             $left = $this->resolveConcat($expr->left, $scope, $boundValues);
-            if ($left === null) {
+            if (null === $left) {
                 return null;
             }
-            return new ConstantStringType($left->getValue() . $rightType->getValue());
+
+            return new ConstantStringType($left->getValue().$rightType->getValue());
         }
         if ($expr->right instanceof Expr\BinaryOp\Concat && $leftType instanceof ConstantStringType) {
             $right = $this->resolveConcat($expr->right, $scope, $boundValues);
-            if ($right === null) {
+            if (null === $right) {
                 return null;
             }
-            return new ConstantStringType($leftType->getValue() . $right->getValue());
+
+            return new ConstantStringType($leftType->getValue().$right->getValue());
         }
 
         if ($leftType instanceof ConstantStringType || $rightType instanceof ConstantStringType) {
@@ -291,6 +292,7 @@ final class ZfSelectReflection
             }
             if ($leftType instanceof ConstantStringType && $expr->right instanceof MethodCall) {
                 $boundValues[] = $expr->right;
+
                 return new ConstantStringType($leftType->getValue().'?');
             }
         }
