@@ -34,4 +34,14 @@ abstract class Clx_Model_Mapper_Abstract
     final public function fetchAllByStatement(ClxProductNet_DbStatement $stmt)
     {
     }
+
+    /**
+     * @return int|string
+     *
+     * @throws Exception
+     */
+    public function t_getSpracheId()
+    {
+        return 456;
+    }
 }
