@@ -199,13 +199,25 @@ class Foo
  INNER JOIN `art` AS `e` ON a.artid = e.artid'", $select->__toString());
     }
 
-    public function joinConcat()
+    public function joinConcatMethod()
     {
         $dbTable = new \DbTable();
         $select = $dbTable->select();
         $select->setIntegrityCheck(false);
         $select->from('ada as a');
         $select->join('art as e', '(a.artid = e.artid AND e.artid='.$this->t_getSpracheId().')');
+
+        assertType("'SELECT `a`.*, `e`.* FROM `ada` AS `a`
+ INNER JOIN `art` AS `e` ON (a.artid = e.artid AND e.artid=?)'", $select->__toString());
+    }
+
+    public function joinConcatVariable(int $sprache)
+    {
+        $dbTable = new \DbTable();
+        $select = $dbTable->select();
+        $select->setIntegrityCheck(false);
+        $select->from('ada as a');
+        $select->join('art as e', '(a.artid = e.artid AND e.artid='.$sprache.')');
 
         assertType("'SELECT `a`.*, `e`.* FROM `ada` AS `a`
  INNER JOIN `art` AS `e` ON (a.artid = e.artid AND e.artid=?)'", $select->__toString());

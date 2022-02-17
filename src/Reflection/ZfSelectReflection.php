@@ -295,6 +295,17 @@ final class ZfSelectReflection
 
                 return new ConstantStringType($leftType->getValue().'?');
             }
+
+            if ($expr->left instanceof Variable && $rightType instanceof ConstantStringType) {
+                $boundValues[] = $expr->left;
+
+                return new ConstantStringType('?'.$rightType->getValue());
+            }
+            if ($leftType instanceof ConstantStringType && $expr->right instanceof Variable) {
+                $boundValues[] = $expr->right;
+
+                return new ConstantStringType($leftType->getValue().'?');
+            }
         }
 
         return null;
